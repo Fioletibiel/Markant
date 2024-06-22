@@ -1,11 +1,17 @@
 # Test your FastAPI endpoints
 
-GET http://127.0.0.1:8000/
-Accept: application/json
+### Test encoding a URL
+POST http://127.0.0.1:8000/encode/
+Content-Type: application/json
 
-###
+{
+  "original_url": "https://www.markant.com/en/markant-group-contacts-of-the-national-companies/contact-poland"
+}
 
-GET http://127.0.0.1:8000/hello/User
-Accept: application/json
+### Test decoding a URL
+POST http://127.0.0.1:8000/decode/
+Content-Type: application/json
 
-###
+{
+  "short_url": "http://short.est/2Qqa35"
+}
