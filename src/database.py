@@ -1,3 +1,7 @@
+"""
+Database module for the URL shortening service.
+"""
+
 from databases import Database
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -33,7 +37,9 @@ class URL(Base):
 async_engine = create_async_engine(DATABASE_URL, echo=True, future=True)
 
 # Create a configured "AsyncSession" class
-AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)
+AsyncSessionLocal = sessionmaker(
+    bind=async_engine, class_=AsyncSession, expire_on_commit=False
+)
 
 
 async def init_db():

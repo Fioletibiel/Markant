@@ -1,3 +1,7 @@
+"""
+Models module for the URL shortening service.
+"""
+
 from pydantic import BaseModel
 
 
