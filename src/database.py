@@ -1,5 +1,10 @@
 """
 Database module for the URL shortening service.
+
+This module defines the database setup, including:
+- Database connection configuration.
+- SQLAlchemy ORM models.
+- Initialization functions to create the necessary tables.
 """
 
 from databases import Database

@@ -1,5 +1,13 @@
 """
 Main module for the URL shortening service.
+
+This module sets up the FastAPI app and defines the API endpoints for:
+- /encode/: Encodes a given URL into a shortened URL.
+- /decode/: Decodes a given shortened URL back to the original URL.
+
+It also includes:
+- The database initialization.
+- Utility functions for URL encoding and decoding.
 """
 
 import hashlib
@@ -15,13 +23,35 @@ from sqlalchemy.future import select
 from src.database import AsyncSessionLocal, init_db
 from src.database import DATABASE_URL, URL
 from src.models import URLModel, ShortURLModel
+from contextlib import asynccontextmanager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 # Initialize FastAPI
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Context manager to handle the lifespan events of the FastAPI application.
+
+    This context manager handles the startup and shutdown events for the FastAPI application.
+    During startup, it initializes the database. During shutdown, it disconnects from the database.
+
+    Args:
+        app (FastAPI): The FastAPI application instance.
+
+    Yields:
+        None
+    """
+    # Startup event
+    await init_db()
+    yield
+    # Shutdown event
+    await database.disconnect()
+
+app = FastAPI(lifespan=lifespan)
 
 # Base62 character set
 BASE62 = string.digits + string.ascii_letters
@@ -130,8 +160,10 @@ async def decode_url(short_url: ShortURLModel,
             logger.warning("Invalid short URL format: %s. "
                            "The URL must start with http://short.est/.",
                            short_url.short_url)
-            raise HTTPException(status_code=400,
-                                detail="Invalid short URL format")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid short URL format. "
+                       "The URL must start with http://short.est/.")
 
         # Extract the Base62 part from the shortened URL
         url_id_str = short_url.short_url.split('/')[-1]
