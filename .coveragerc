@@ -1,0 +1,32 @@
+[run]
+# List of file patterns, separated by commas, specifying files to ignore when running coverage
+omit =
+    */tests/*
+    */venv/*
+    */.venv/*
+    */env/*
+    */.env/*
+    */migrations/*
+    */__init__.py
+
+[report]
+# Exclude lines from the coverage report. Useful for excluding code that is meant to be non-covered.
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+    # Don't complain if tests don't hit defensive assertion code:
+    raise NotImplementedError
+    # Don't complain if non-runnable code isn't run:
+    if __name__ == .__main__.:
+    # Test functions
+    def test_*
+    # Main function
+    if __name__ == "__main__":
+
+[html]
+# Directory to output the HTML coverage report
+directory = coverage_html_report
+
+[xml]
+# Path to the XML coverage report
+output = coverage.xml
