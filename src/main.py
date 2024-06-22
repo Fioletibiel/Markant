@@ -1,3 +1,7 @@
+"""
+Main module for the URL shortening service.
+"""
+
 import hashlib
 import logging
 import string
@@ -82,31 +86,36 @@ async def encode_url(url: URLModel, db: AsyncSession = Depends(get_db)):
     :param db: Database session.
     :return: ShortURLModel object containing the shortened URL.
     """
-    logger.info(f"Received URL to encode: {url.original_url}")
+    logger.info("Received URL to encode: %s", url.original_url)
     try:
         # Check if the original URL already exists in the database
-        result = await db.execute(select(URL).filter(URL.original_url == url.original_url))
+        result = await db.execute(select(URL).filter(
+            URL.original_url == url.original_url)
+        )
         existing_url = result.scalars().first()
         if existing_url:
-            logger.info(f"URL already exists: {existing_url.short_url}")
-            return ShortURLModel(short_url=f"http://short.est/{existing_url.short_url}")
+            logger.info("URL already exists: %s", existing_url.short_url)
+            return ShortURLModel(
+                short_url=f"http://short.est/{existing_url.short_url}"
+            )
 
         # Generate short URL if it does not exist
         short_url = generate_short_url(url.original_url)
-        logger.info(f"Generated short URL: {short_url}")
+        logger.info("Generated short URL: %s", short_url)
         db_url = URL(original_url=url.original_url, short_url=short_url)
         db.add(db_url)
         await db.commit()
         await db.refresh(db_url)
-        logger.info(f"URL successfully encoded and stored: {db_url.id}")
+        logger.info("URL successfully encoded and stored: %s", db_url.id)
         return ShortURLModel(short_url=f"http://short.est/{short_url}")
     except Exception as e:
-        logger.error(f"Error encoding URL: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error("Error encoding URL: %s", str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/decode/", response_model=URLModel)
-async def decode_url(short_url: ShortURLModel, db: AsyncSession = Depends(get_db)):
+async def decode_url(short_url: ShortURLModel,
+                     db: AsyncSession = Depends(get_db)):
     """
     Endpoint to decode a shortened URL to its original URL.
 
@@ -114,13 +123,15 @@ async def decode_url(short_url: ShortURLModel, db: AsyncSession = Depends(get_db
     :param db: Database session.
     :return: URLModel object containing the original URL.
     """
-    logger.info(f"Received short URL to decode: {short_url.short_url}")
+    logger.info("Received short URL to decode: %s", short_url.short_url)
     try:
         # Validate that the short URL matches the expected format
         if not short_url.short_url.startswith("http://short.est/"):
-            logger.warning(f"Invalid short URL format: {short_url.short_url}. "
-                           f"The URL must start with http://short.est/.")
-            raise HTTPException(status_code=400, detail="Invalid short URL format")
+            logger.warning("Invalid short URL format: %s. "
+                           "The URL must start with http://short.est/.",
+                           short_url.short_url)
+            raise HTTPException(status_code=400,
+                                detail="Invalid short URL format")
 
         # Extract the Base62 part from the shortened URL
         url_id_str = short_url.short_url.split('/')[-1]
@@ -131,11 +142,11 @@ async def decode_url(short_url: ShortURLModel, db: AsyncSession = Depends(get_db
         db_url = result.scalars().first()
 
         if db_url is None:
-            logger.warning(f"Short URL not found: {short_url.short_url}")
+            logger.warning("Short URL not found: %s", short_url.short_url)
             raise HTTPException(status_code=404, detail="Short URL not found")
 
-        logger.info(f"Short URL decoded successfully: {db_url.original_url}")
+        logger.info("Short URL decoded successfully: %s", db_url.original_url)
         return URLModel(original_url=db_url.original_url)
     except Exception as e:
-        logger.error(f"Error decoding URL: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error("Error decoding URL: %s", str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
