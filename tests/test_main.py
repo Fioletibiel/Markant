@@ -42,8 +42,7 @@ async def test_decode_url(client):
         # First, encode a URL to get a shortened URL
         encode_response = await ac.post(
             "/encode/",
-            json={
-                "original_url": "https://www.markant.com/en"}
+            json={"original_url": "https://www.markant.com/en/"}
         )
         assert encode_response.status_code == 200
         short_url = encode_response.json()["short_url"]
@@ -54,8 +53,8 @@ async def test_decode_url(client):
             json={"short_url": short_url}
         )
         assert decode_response.status_code == 200
-        data = decode_response.json()
-        assert data["original_url"] == "https://www.markant.com/en"
+        decoded_url = decode_response.json()["original_url"]
+        assert decoded_url == "https://www.markant.com/en"
 
 
 @pytest.mark.asyncio

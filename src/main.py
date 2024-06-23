@@ -24,6 +24,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.future import select
+from starlette.responses import JSONResponse
 
 from src.database import AsyncSessionLocal, init_db
 from src.database import DATABASE_URL, URL
@@ -215,6 +216,8 @@ async def decode_url(short_url: ShortURLModel,
 
         logger.info("Short URL decoded successfully: %s", db_url.original_url)
         return URLModel(original_url=db_url.original_url)
+    except HTTPException as http_exc:
+        raise http_exc  # Re-raise HTTP exceptions without modification
     except Exception as e:
         logger.error("Error decoding URL: %s", str(e))
         raise HTTPException(status_code=500, detail=str(e)) from e
