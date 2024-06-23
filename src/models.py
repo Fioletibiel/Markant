@@ -1,7 +1,8 @@
 """
 Models module for the URL shortening service.
 
-This module defines the Pydantic models used for request and response validation:
+This module defines the Pydantic models used for
+request and response validation:
 - URLModel: Model for the original URL.
 - ShortURLModel: Model for the shortened URL.
 """
