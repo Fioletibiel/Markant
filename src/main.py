@@ -150,11 +150,12 @@ async def encode_url(url: URLModel, db: AsyncSession = Depends(get_db)):
     :param db: Database session.
     :return: ShortURLModel object containing the shortened URL.
     """
-    logger.info("Received URL to encode: %s", url.original_url)
+    original_url = url.original_url.strip('/')
+    logger.info("Received URL to encode: %s", original_url)
     try:
         # Check if the original URL already exists in the database
         result = await db.execute(select(URL).filter(
-            URL.original_url == url.original_url)
+            URL.original_url == original_url)
         )
         existing_url = result.scalars().first()
         if existing_url:
@@ -164,9 +165,9 @@ async def encode_url(url: URLModel, db: AsyncSession = Depends(get_db)):
             )
 
         # Generate short URL if it does not exist
-        short_url = generate_short_url(url.original_url)
+        short_url = generate_short_url(original_url)
         logger.info("Generated short URL: %s", short_url)
-        db_url = URL(original_url=url.original_url, short_url=short_url)
+        db_url = URL(original_url=original_url, short_url=short_url)
         db.add(db_url)
         await db.commit()
         await db.refresh(db_url)
@@ -187,20 +188,21 @@ async def decode_url(short_url: ShortURLModel,
     :param db: Database session.
     :return: URLModel object containing the original URL.
     """
-    logger.info("Received short URL to decode: %s", short_url.short_url)
+    short_url = short_url.short_url.strip('/')
+    logger.info("Received short URL to decode: %s", short_url)
     try:
         # Validate that the short URL matches the expected format
-        if not short_url.short_url.startswith("http://short.est/"):
+        if not short_url.startswith("http://short.est/"):
             logger.warning("Invalid short URL format: %s. "
                            "The URL must start with http://short.est/.",
-                           short_url.short_url)
+                           short_url)
             raise HTTPException(
                 status_code=400,
                 detail="Invalid short URL format. "
                        "The URL must start with http://short.est/.")
 
         # Extract the Base62 part from the shortened URL
-        url_id_str = short_url.short_url.split('/')[-1]
+        url_id_str = short_url.split('/')[-1]
 
         # Check if the shortened URL exists in the database
         query = select(URL).where(URL.short_url == url_id_str)
@@ -208,7 +210,7 @@ async def decode_url(short_url: ShortURLModel,
         db_url = result.scalars().first()
 
         if db_url is None:
-            logger.warning("Short URL not found: %s", short_url.short_url)
+            logger.warning("Short URL not found: %s", short_url)
             raise HTTPException(status_code=404, detail="Short URL not found")
 
         logger.info("Short URL decoded successfully: %s", db_url.original_url)
