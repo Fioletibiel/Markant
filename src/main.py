@@ -13,9 +13,13 @@ It also includes:
 import hashlib
 import logging
 import string
+from contextlib import asynccontextmanager
 
 from databases import Database
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.future import select
@@ -23,7 +27,6 @@ from sqlalchemy.future import select
 from src.database import AsyncSessionLocal, init_db
 from src.database import DATABASE_URL, URL
 from src.models import URLModel, ShortURLModel
-from contextlib import asynccontextmanager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,8 +39,10 @@ async def lifespan(app: FastAPI):
     """
     Context manager to handle the lifespan events of the FastAPI application.
 
-    This context manager handles the startup and shutdown events for the FastAPI application.
-    During startup, it initializes the database. During shutdown, it disconnects from the database.
+    This context manager handles the startup and shutdown events
+    for the FastAPI application.
+    During startup, it initializes the database.
+    During shutdown, it disconnects from the database.
 
     Args:
         app (FastAPI): The FastAPI application instance.
@@ -52,6 +57,33 @@ async def lifespan(app: FastAPI):
     await database.disconnect()
 
 app = FastAPI(lifespan=lifespan)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
+
+# Set up templates
+templates = Jinja2Templates(directory="src/templates")
+
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    """
+    Handle the root URL endpoint.
+
+    This function serves the main page of the URL shortener application.
+    It uses FastAPI's TemplateResponse to render the "index.html" template
+    and return it as an HTML response.
+
+    Args:
+        request (Request): The request object containing
+        metadata about the request.
+
+    Returns:
+        TemplateResponse: The HTML response with
+        the rendered "index.html" template.
+    """
+    return templates.TemplateResponse("index.html", {"request": request})
+
 
 # Base62 character set
 BASE62 = string.digits + string.ascii_letters

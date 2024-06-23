@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Markant URL Shortener</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', path='/logoMarkant.png') }}">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 16px;
+            background-color: #333333;
+            color: white;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        .wrapper {
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "sidebar content"
+                "footer footer";
+            grid-template-rows: auto 1fr auto;
+            grid-template-columns: 200px 1fr;
+            min-height: 100vh;
+        }
+
+        .header {
+            grid-area: header;
+            background-color: #555555;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header img {
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background-color: #444444;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: inherit;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #555555;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover {
+            background-color: #666666;
+        }
+
+        .content {
+            grid-area: content;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            grid-area: footer;
+            background-color: #555555;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        form input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        form button {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #444444;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <a href="/">
+            <img class="logo" src="{{ url_for('static', path='/logoMarkant.png') }}">
+        </a>
+        <b>URL Shortener</b>
+    </div>
+
+    <div class="sidebar">
+        <a href="#" class="button" id="encode-btn">Encode</a>
+        <a href="#" class="button" id="decode-btn">Decode</a>
+    </div>
+
+    <div class="content">
+        <form id="url-form">
+            <input type="text" id="url-input" placeholder="Enter your URL here">
+            <button type="submit" id="form-btn">Shorten</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <div class="footer">
+        <b>©2024 COPYRIGHT Paweł Kamiński for Markant</b>
+    </div>
+</div>
+
+<div class="popup" id="error-popup">Error: Something went wrong!</div>
+
+<script>
+    /**
+     * Handles the click event for the "Encode" button.
+     * Updates the input placeholder, button text, and assigns the handleEncode function to the button's onclick event.
+     */
+    const encodeBtn = document.getElementById('encode-btn');
+    encodeBtn.addEventListener('click', () => {
+        input.placeholder = "Enter your URL here";
+        formBtn.textContent = "Shorten";
+        formBtn.onclick = handleEncode;
+        input.value = "";  // Clear the input field
+        resultDiv.textContent = "";  // Clear the result field
+    });
+
+    /**
+     * Handles the click event for the "Decode" button.
+     * Updates the input placeholder, button text, and assigns the handleDecode function to the button's onclick event.
+     */
+    const decodeBtn = document.getElementById('decode-btn');
+    decodeBtn.addEventListener('click', () => {
+        input.placeholder = "Enter shortened URL here";
+        formBtn.textContent = "Decode";
+        formBtn.onclick = handleDecode;
+        input.value = "";  // Clear the input field
+        resultDiv.textContent = "";  // Clear the result field
+    });
+
+    /**
+     * Handles the encoding of a URL.
+     * Sends a POST request to the "/encode/" endpoint with the original URL.
+     * Updates the resultDiv with the shortened URL or shows an error popup if the request fails.
+     *
+     * @param {Event} event - The event object.
+     */
+    async function handleEncode(event) {
+        event.preventDefault();
+        resultDiv.textContent = "";  // Clear previous results
+        const originalUrl = input.value;
+        const response = await fetch("/encode/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({original_url: originalUrl})
+        });
+        const data = await response.json();
+        if (response.status === 200) {
+            resultDiv.textContent = `Shortened URL: ${data.short_url}`;
+        } else {
+            showErrorPopup(`Error: ${data.detail}`);
+        }
+    }
+
+    /**
+     * Handles the decoding of a shortened URL.
+     * Sends a POST request to the "/decode/" endpoint with the shortened URL.
+     * Updates the resultDiv with the original URL or shows an error popup if the request fails.
+     *
+     * @param {Event} event - The event object.
+     */
+    async function handleDecode(event) {
+        event.preventDefault();
+        resultDiv.textContent = "";  // Clear previous results
+        const shortUrl = input.value;
+        const response = await fetch("/decode/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({short_url: shortUrl})
+        });
+        const data = await response.json();
+        if (response.status === 200) {
+            resultDiv.textContent = `Original URL: ${data.original_url}`;
+        } else {
+            showErrorPopup(`Error: ${data.detail}`);
+        }
+    }
+
+    /**
+     * Displays an error popup with the specified message.
+     * The popup disappears after 3 seconds.
+     *
+     * @param {string} message - The error message to display.
+     */
+    function showErrorPopup(message) {
+        resultDiv.textContent = "";  // Clear previous results
+        errorPopup.textContent = message;
+        errorPopup.classList.add('show');
+        setTimeout(() => {
+            errorPopup.classList.remove('show');
+        }, 3000);
+    }
+
+    // Get references to necessary DOM elements
+    const input = document.getElementById('url-input');
+    const formBtn = document.getElementById('form-btn');
+    const resultDiv = document.getElementById('result');
+    const errorPopup = document.getElementById('error-popup');
+
+    // Initialize with encode form
+    formBtn.onclick = handleEncode;
+</script>
+</body>
+</html>
