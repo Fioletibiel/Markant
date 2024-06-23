@@ -2,7 +2,7 @@
 This module sets up the test configuration for the FastAPI application,
 including the creation of a test database and providing a session for testing.
 """
-
+import collections
 import os
 import sys
 
@@ -28,7 +28,7 @@ TestingSessionLocal = sessionmaker(
 )
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 async def init_test_db():
     """
     Initializes the test database and creates the required tables.
@@ -40,8 +40,8 @@ async def init_test_db():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest.fixture(scope="function")
-async def db_session():
+@pytest.fixture(scope="module")
+async def db_session(init_test_db):
     """
     Provides a new database session for each test.
     """
@@ -49,16 +49,10 @@ async def db_session():
         yield session
 
 
-@pytest.fixture(scope="function")
-def client(db_session):
+@pytest.fixture(scope="module")
+def client():
     """
     Provides a test client for making requests to the FastAPI application.
     """
-    async def override_get_db():
-        async for session in db_session:
-            yield session
-
-    app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
         yield c
-    app.dependency_overrides.clear()
