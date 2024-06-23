@@ -14,15 +14,13 @@ The tests cover various scenarios including:
 import pytest
 from httpx import AsyncClient
 
-from src.main import app
-
 
 @pytest.mark.asyncio
-async def test_encode_url():
+async def test_encode_url(client):
     """
     Test the /encode/ endpoint for encoding a URL to a shortened URL.
     """
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
         response = await ac.post(
             "/encode/",
             json={"original_url": "https://www.markant.com/en/"}
@@ -35,12 +33,12 @@ async def test_encode_url():
 
 
 @pytest.mark.asyncio
-async def test_decode_url():
+async def test_decode_url(client):
     """
     Test the /decode/ endpoint for decoding
     a shortened URL back to the original URL.
     """
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
         # First, encode a URL to get a shortened URL
         encode_response = await ac.post(
             "/encode/",
@@ -61,11 +59,11 @@ async def test_decode_url():
 
 
 @pytest.mark.asyncio
-async def test_decode_invalid_format_url():
+async def test_decode_invalid_format_url(client):
     """
     Test the /decode/ endpoint with an invalid URL format.
     """
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
         response = await ac.post(
             "/decode/",
             json={"short_url": "http://invalid.url/abc123"}
@@ -77,11 +75,11 @@ async def test_decode_invalid_format_url():
 
 
 @pytest.mark.asyncio
-async def test_decode_nonexistent_url():
+async def test_decode_nonexistent_url(client):
     """
     Test the /decode/ endpoint with a non-existent shortened URL.
     """
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
         response = await ac.post(
             "/decode/",
             json={"short_url": "http://short.est/nonexistent"}
