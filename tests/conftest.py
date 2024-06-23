@@ -50,12 +50,12 @@ async def db_session():
 
 
 @pytest.fixture(scope="function")
-def client(database_session):
+def client(db_session):
     """
     Provides a test client for making requests to the FastAPI application.
     """
     async def override_get_db():
-        async for session in database_session:
+        async for session in db_session:
             yield session
 
     app.dependency_overrides[get_db] = override_get_db
