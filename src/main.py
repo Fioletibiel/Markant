@@ -12,6 +12,7 @@ It also includes:
 
 import hashlib
 import logging
+import os
 import string
 from contextlib import asynccontextmanager
 
@@ -59,7 +60,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="src/static"), name="static")
+static_directory = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=static_directory), name="static")
 
 # Set up templates
 templates = Jinja2Templates(directory="src/templates")

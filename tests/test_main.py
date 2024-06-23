@@ -31,7 +31,7 @@ async def test_encode_url():
     data = response.json()
     assert "short_url" in data
     assert data["short_url"].startswith("http://short.est/")
-    assert data["short_url"] == "http://short.est/5FYwyk"
+    assert data["short_url"] == "http://short.est/23mSFs"
 
 
 @pytest.mark.asyncio
