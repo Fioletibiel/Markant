@@ -2,8 +2,8 @@
 This module contains tests for the URL shortening service.
 
 It includes tests for the following endpoints:
-- /encode/: Encodes a URL to a shortened URL.
-- /decode/: Decodes a shortened URL back to the original URL.
+- /api/v1/encode/: Encodes a URL to a shortened URL.
+- /api/v1/decode/: Decodes a shortened URL back to the original URL.
 
 The tests cover various scenarios including:
 - Successful encoding and decoding of URLs.
@@ -18,11 +18,11 @@ from httpx import AsyncClient
 @pytest.mark.asyncio
 async def test_encode_url(client):
     """
-    Test the /encode/ endpoint for encoding a URL to a shortened URL.
+    Test the /api/v1/encode/ endpoint for encoding a URL to a shortened URL.
     """
     async with AsyncClient(app=client.app, base_url="http://test") as ac:
         response = await ac.post(
-            "/encode/",
+            "/api/v1/encode/",
             json={"original_url": "https://www.markant.com/en/"}
         )
     assert response.status_code == 200
@@ -35,13 +35,13 @@ async def test_encode_url(client):
 @pytest.mark.asyncio
 async def test_decode_url(client):
     """
-    Test the /decode/ endpoint for decoding
+    Test the /api/v1/decode/ endpoint for decoding
     a shortened URL back to the original URL.
     """
     async with AsyncClient(app=client.app, base_url="http://test") as ac:
         # First, encode a URL to get a shortened URL
         encode_response = await ac.post(
-            "/encode/",
+            "/api/v1/encode/",
             json={"original_url": "https://www.markant.com/en/"}
         )
         assert encode_response.status_code == 200
@@ -49,7 +49,7 @@ async def test_decode_url(client):
 
         # Now, decode the shortened URL
         decode_response = await ac.post(
-            "/decode/",
+            "/api/v1/decode/",
             json={"short_url": short_url}
         )
         assert decode_response.status_code == 200
@@ -60,11 +60,11 @@ async def test_decode_url(client):
 @pytest.mark.asyncio
 async def test_decode_invalid_format_url(client):
     """
-    Test the /decode/ endpoint with an invalid URL format.
+    Test the /api/v1/decode/ endpoint with an invalid URL format.
     """
     async with AsyncClient(app=client.app, base_url="http://test") as ac:
         response = await ac.post(
-            "/decode/",
+            "/api/v1/decode/",
             json={"short_url": "http://invalid.url/abc123"}
         )
     assert response.status_code == 400
@@ -76,11 +76,11 @@ async def test_decode_invalid_format_url(client):
 @pytest.mark.asyncio
 async def test_decode_nonexistent_url(client):
     """
-    Test the /decode/ endpoint with a non-existent shortened URL.
+    Test the /api/v1/decode/ endpoint with a non-existent shortened URL.
     """
     async with AsyncClient(app=client.app, base_url="http://test") as ac:
         response = await ac.post(
-            "/decode/",
+            "/api/v1/decode/",
             json={"short_url": "http://short.est/nonexistent"}
         )
     assert response.status_code == 404

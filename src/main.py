@@ -2,8 +2,8 @@
 Main module for the URL shortening service.
 
 This module sets up the FastAPI app and defines the API endpoints for:
-- /encode/: Encodes a given URL into a shortened URL.
-- /decode/: Decodes a given shortened URL back to the original URL.
+- /api/v1/encode/: Encodes a given URL into a shortened URL.
+- /api/v1/decode/: Decodes a given shortened URL back to the original URL.
 
 It also includes:
 - The database initialization.
@@ -142,7 +142,7 @@ def generate_short_url(original_url: str) -> str:
     return short_url[:6]
 
 
-@app.post("/encode/", response_model=ShortURLModel)
+@app.post("/api/v1/encode/", response_model=ShortURLModel)
 async def encode_url(url: URLModel, db: AsyncSession = Depends(get_db)):
     """
     Endpoint to encode an original URL to a shortened URL.
@@ -179,7 +179,7 @@ async def encode_url(url: URLModel, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.post("/decode/", response_model=URLModel)
+@app.post("/api/v1/decode/", response_model=URLModel)
 async def decode_url(short_url: ShortURLModel,
                      db: AsyncSession = Depends(get_db)):
     """
