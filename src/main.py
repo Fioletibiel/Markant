@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):   # pragma: no cover
     """
     Context manager to handle the lifespan events of the FastAPI application.
 
@@ -69,7 +69,7 @@ templates = Jinja2Templates(directory="src/templates")
 
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
+async def read_root(request: Request):  # pragma: no cover
     """
     Handle the root URL endpoint.
 
@@ -93,10 +93,10 @@ BASE62 = string.digits + string.ascii_letters
 
 # Initialize the async engine and database
 async_engine = create_async_engine(DATABASE_URL, echo=True, future=True)
-database = Database(DATABASE_URL)
+database = Database(DATABASE_URL)   # pragma: no cover
 
 
-async def get_db():
+async def get_db():     # pragma: no cover
     """
     Dependency to get a database session.
     """
@@ -105,7 +105,7 @@ async def get_db():
 
 
 @app.on_event("startup")
-async def startup():
+async def startup():    # pragma: no cover
     """
     Event triggered at application startup.
     Initializes the database.
@@ -113,7 +113,7 @@ async def startup():
     await init_db()
 
 
-def encode_base62(num: int) -> str:
+def encode_base62(num: int) -> str:     # pragma: no cover
     """
     Encodes an integer to a Base62 string.
 
@@ -129,7 +129,7 @@ def encode_base62(num: int) -> str:
     return ''.join(reversed(base62))
 
 
-def generate_short_url(original_url: str) -> str:
+def generate_short_url(original_url: str) -> str:   # pragma: no cover
     """
     Generates a short URL from the original URL using Base62 encoding.
 

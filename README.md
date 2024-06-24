@@ -43,3 +43,59 @@ There is no restriction on how your encode/decode algorithm should work. You jus
 - **Correctness:** does the functionality act insensible, thought-out ways?
 - **Maintainability:** is it written in a clean, maintainable way?
 - **Auditability:** Show us your work through your commit history
+
+
+---
+
+---
+
+
+# URL Shortener Service
+
+This project is a URL shortening service built with FastAPI.
+
+## Installation
+
+1. **Clone the repository:**  
+`git clone https://github.com/Fioletibiel/Markant.git`  
+`cd <project-directory>`  
+  
+
+2. **Install dependencies:**  `pip install -r requirements.txt`.
+
+## Running Tests
+
+To run tests, use pytest: `pytest`.
+
+## Running the Server
+
+To start the FastAPI server:
+`uvicorn src.main:app --reload`.
+
+The server will start at `http://localhost:8000`.
+
+## Viewing API Documentation
+
+### Swagger UI
+
+FastAPI automatically generates Swagger documentation. After starting the server, navigate to:
+
+http://localhost:8000/docs
+
+Here you can explore the API endpoints, send requests, and view responses interactively.
+
+### Redoc
+
+To view the API documentation in Redoc format, go to:
+
+http://localhost:8000/redoc
+
+
+Redoc provides a clean, responsive interface for exploring your API specifications.
+
+## Additional Notes
+
+- **Deployment:** For deploying FastAPI applications to production, consider using ASGI servers like `uvicorn` behind a reverse proxy (e.g., Nginx, Apache) for load balancing and security.     
+
+  
+- **Recruitment:** This project was made for Markant in a recruitment process.
