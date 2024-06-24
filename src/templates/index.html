@@ -199,7 +199,7 @@
 
     /**
      * Handles the encoding of a URL.
-     * Sends a POST request to the "/encode/" endpoint with the original URL.
+     * Sends a POST request to the "/api/v1/encode/" endpoint with the original URL.
      * Updates the resultDiv with the shortened URL or shows an error popup if the request fails.
      *
      * @param {Event} event - The event object.
@@ -208,7 +208,7 @@
         event.preventDefault();
         resultDiv.textContent = "";  // Clear previous results
         const originalUrl = input.value;
-        const response = await fetch("/encode/", {
+        const response = await fetch("/api/v1/encode/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -225,7 +225,7 @@
 
     /**
      * Handles the decoding of a shortened URL.
-     * Sends a POST request to the "/decode/" endpoint with the shortened URL.
+     * Sends a POST request to the "/api/v1/decode/" endpoint with the shortened URL.
      * Updates the resultDiv with the original URL or shows an error popup if the request fails.
      *
      * @param {Event} event - The event object.
@@ -234,7 +234,7 @@
         event.preventDefault();
         resultDiv.textContent = "";  // Clear previous results
         const shortUrl = input.value;
-        const response = await fetch("/decode/", {
+        const response = await fetch("/api/v1/decode/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
